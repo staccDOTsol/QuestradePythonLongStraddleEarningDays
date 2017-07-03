@@ -197,9 +197,9 @@ if weekno<5:
 			price = response['quotes'][0]['lastTradePriceTrHrs']
 			uri = server + "v1/markets/quotes/options"
 			down = int(price)
-			i = 44
+			i = 59
 			done = False
-			while i <= 70 and done is not True: #70
+			while i <= 90 and done is not True: #70
 		
 		 		i+=1
 								

@@ -18,6 +18,10 @@ http://www.questrade.com/api/documentation/getting-started
 
 and paste the generated token, replacing the contents of 'refresh_token.txt.'
 
+Also, replace every instance of '26016670' with your account # you want to work with.
+
+This script works with both Questrade practice & real accounts.
+
 Afterwards, run: 
 sudo nohup quest.sh &
 

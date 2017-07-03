@@ -61,4 +61,4 @@ def index(request):
 	print 'closed pnl: ' + str(closedPnl)
 	print 'open pnl: ' + str(openPnl)
 	print 'cost: ' + str(totalCost)
-	return HttpResponse('<html><head><meta http-equiv="refresh" content="60" ></head><body>' + body + '</body></html>')
+	return HttpResponse('<html><head><meta http-equiv="refresh" content="580" ></head><body>' + body + '</body></html>')

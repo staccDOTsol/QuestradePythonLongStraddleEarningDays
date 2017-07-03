@@ -4,8 +4,46 @@ from lxml import html
 import math
 import os.path
 import datetime
-
+import time
+server = ""
+headers = {}
 weekno = datetime.datetime.today().weekday()
+def requestTry(i):
+	date = today + DT.timedelta(days=i)
+	dates = date.strftime('%Y-%m-%d')
+	dates += "T00:00:00.000000-05:00" 
+	#print dates
+	data = {
+    "filters": [
+	{
+	    "optionType": "Call",
+	    "underlyingId": symbol,
+	    "expiryDate": dates,
+	    "minstrikePrice": down,
+	    "maxstrikePrice": down
+	},
+	{
+	    "optionType": "Put",
+	    "underlyingId": symbol,
+	    "expiryDate": dates,
+	    "minstrikePrice": down,
+	    "maxstrikePrice": down
+	}
+    ]
+}	
+	r = requests.post(uri, json=data, headers=headers)
+	return r			
+def perCurrency():
+	uri = server + "v1/accounts/26016670/balances"
+	r = requests.get(uri, headers=headers)
+	response = r.json()
+	if 'perCurrencyBalances' in response:
+		
+		return response['perCurrencyBalances'][1]['buyingPower']
+	else:
+		print 'time.sleep60'
+		time.sleep(60)
+		perCurrency()
 if weekno<5:
 	today = DT.date.today()
 	#one_day = today + DT.timedelta(days=1) ## in production
@@ -31,6 +69,17 @@ if weekno<5:
 	r = requests.get(uri, headers=headers)
 	response = r.json()
 	print response
+	i = 1
+	takenUnderlyings = []
+	while i<= 9:
+		i+=1
+		if os.path.isfile((today + DT.timedelta(days=i)).strftime('%Y-%m-%d') + ".txt"):
+
+			with open((today + DT.timedelta(days=i)).strftime('%Y-%m-%d') + ".txt", 'r') as r:
+					for line in r.readlines():
+						if "," in line:
+							takenUnderlyings.append(line[:line.index(',')])
+							print line[:line.index(',')]
 	if os.path.isfile(one_day.strftime('%Y-%m-%d') + ".txt"):
 
 		with open(one_day.strftime('%Y-%m-%d') + ".txt", 'r') as r:
@@ -122,116 +171,105 @@ if weekno<5:
 			f.write(company[start:end] + '\n')
 	print earningTickers
 
-	uri = server + "v1/accounts/26016670/balances"
-	r = requests.get(uri, headers=headers)
-	response = r.json()
+	usdbuyingpower = perCurrency()
 	#print response
-	cadbuyingpower = response['perCurrencyBalances'][0]['buyingPower']
-	usdbuyingpower = response['perCurrencyBalances'][1]['buyingPower']
-
+	
 	symbolIds = []
 
-	for ticker in earningTickers:
-		uri = server + "v1/symbols/search?prefix=" + ticker
-		r = requests.get(uri, headers=headers)
-		response = r.json()
-		symbolIds.append(response['symbols'][0]['symbolId'])
+	for ticker in earningTickers:	
+		time.sleep(2)
+		if ticker not in takenUnderlyings:
+			uri = server + "v1/symbols/search?prefix=" + ticker
+			r = requests.get(uri, headers=headers)
+			response = r.json()
+			if 'symbols' in response:
+				symbolIds.append(response['symbols'][0]['symbolId'])
+			else:
+				print response
+		else:
+			print 'ticker ' + ticker + ' already taken!'
 	for symbol in symbolIds:
+		time.sleep(1)
 		uri = server + "v1/markets/quotes/" + str(symbol)
 		r = requests.get(uri, headers=headers)
 		response = r.json()
-		price = response['quotes'][0]['lastTradePriceTrHrs']
-		uri = server + "v1/markets/quotes/options"
-		down = int(price)
-		i = 44
-		done = False
-		while i <= 70 and done is not True: #70
+		if 'quotes' in response:
+			price = response['quotes'][0]['lastTradePriceTrHrs']
+			uri = server + "v1/markets/quotes/options"
+			down = int(price)
+			i = 44
+			done = False
+			while i <= 70 and done is not True: #70
 		
-	 		i+=1
-			date = today + DT.timedelta(days=i)
-			dates = date.strftime('%Y-%m-%d')
-			dates += "T00:00:00.000000-05:00" 
-			#print dates
-			data = {
-		    "filters": [
-			{
-			    "optionType": "Call",
-			    "underlyingId": symbol,
-			    "expiryDate": dates,
-			    "minstrikePrice": down,
-			    "maxstrikePrice": down
-			},
-			{
-			    "optionType": "Put",
-			    "underlyingId": symbol,
-			    "expiryDate": dates,
-			    "minstrikePrice": down,
-			    "maxstrikePrice": down
-			}
-		    ]
-		}	
-			r = requests.post(uri, json=data, headers=headers)
-			response = r.json()
-			#print response
-			if len(response['optionQuotes']) > 1:	
-				ask1 = response['optionQuotes'][0]['askPrice']
-				print ask1
-				ask2 = response['optionQuotes'][1]['askPrice']
-				print ask2
-				if ask1 is not None:
-					cost = (ask1 * 100) + (ask2 * 100)
-					qty = int((usdbuyingpower / 20) / cost)
-					print qty 	
-					option1 = response['optionQuotes'][0]['symbolId']
-					option2 = response['optionQuotes'][1]['symbolId']
-					done = True
-					underlying = response['optionQuotes'][0]['underlying']
-					#print underlying
-					uri = server + "v1/accounts/26016670/orders"
-					data = { 
-						"accountNumber" : 26016670,
-						"symbolId": option1,
-						"quantity": qty,
-						"isAllOrNone": True,
-						"isAnonymous": False,
-						"orderType": "Market",
-						"timeInForce": "Day",
-						"action": "Buy",
-						"primaryRoute": "AUTO",
-						"secondaryRoute": "AUTO"
-					}
-					r = requests.post(uri, json=data, headers=headers)
-					response1 = r.json()
-					#print response1
-					data = { 
-						"accountNumber" : 26016670,
-						"symbolId": option2,
-						"quantity": qty,
-						"isAllOrNone": True,
-						"isAnonymous": False,
-						"orderType": "Market",
-						"timeInForce": "Day",
-						"action": "Buy",
-						"primaryRoute": "AUTO",
-						"secondaryRoute": "AUTO"
-					}
-					r = requests.post(uri, json=data, headers=headers)
-					response = r.json()
+		 		i+=1
+								
+				try:
+					response = requestTry(i).json()
+				
+				except ValueError as e:
+					print 'time.sleep(60)'
+					time.sleep(60)
 					#print response
-					with open(eight_days.strftime('%Y-%m-%d') + '.txt', 'a') as f:
-					    with open(eight_days.strftime('%Y-%m-%d') + '.txt', 'r') as r:
-						    for line in r.readlines():
-							if line.startswith(underlying):
-								f.write(underlying + "," + str(option1) + "," + str(option2) + "\n")
-					with open(nine_days.strftime('%Y-%m-%d') + '.txt', 'a') as f:
-					    with open(nine_days.strftime('%Y-%m-%d') + '.txt', 'r') as r:
-						    for line in r.readlines():
-							if line.startswith(underlying):
-								f.write(underlying + "," + str(option1) + "," + str(option2) + "\n")
-					with open(ten_days.strftime('%Y-%m-%d') + '.txt', 'a') as f:
-					    with open(ten_days.strftime('%Y-%m-%d') + '.txt', 'r') as r:
-						    for line in r.readlines():
-							if line.startswith(underlying):
-								f.write(underlying + "," + str(option1) + "," + str(option2) + "\n")
+				if 'optionQuotes' in response:
+					if len(response['optionQuotes']) > 1:		
+						ask1 = response['optionQuotes'][0]['askPrice']
+						print ask1
+						ask2 = response['optionQuotes'][1]['askPrice']
+						print ask2
+						if ask1 is not None:
+							cost = (ask1 * 100) + (ask2 * 100)
+							qty = int((usdbuyingpower / 3 / 20) / cost)
+							print qty 	
+							option1 = response['optionQuotes'][0]['symbolId']
+							option2 = response['optionQuotes'][1]['symbolId']
+							done = True
+							underlying = response['optionQuotes'][0]['underlying']
+							#print underlying
+							uri = server + "v1/accounts/26016670/orders"
+							data = { 
+								"accountNumber" : 26016670,
+								"symbolId": option1,
+								"quantity": qty,
+								"isAllOrNone": True,
+								"isAnonymous": False,
+								"orderType": "Market",
+								"timeInForce": "Day",
+								"action": "Buy",
+								"primaryRoute": "AUTO",
+								"secondaryRoute": "AUTO"
+							}
+							r = requests.post(uri, json=data, headers=headers)
+							response1 = r.json()
+							#print response1
+							data = { 
+								"accountNumber" : 26016670,
+								"symbolId": option2,
+								"quantity": qty,
+								"isAllOrNone": True,
+								"isAnonymous": False,
+								"orderType": "Market",
+								"timeInForce": "Day",
+								"action": "Buy",
+								"primaryRoute": "AUTO",
+								"secondaryRoute": "AUTO"
+							}
+							r = requests.post(uri, json=data, headers=headers)
+							response = r.json()
+							#print response
+							with open(eight_days.strftime('%Y-%m-%d') + '.txt', 'a') as f:
+							    with open(eight_days.strftime('%Y-%m-%d') + '.txt', 'r') as r:
+								    for line in r.readlines():
+									if line.startswith(underlying):
+										f.write(underlying + "," + str(option1) + "," + str(option2) + "\n")
+							with open(nine_days.strftime('%Y-%m-%d') + '.txt', 'a') as f:
+							    with open(nine_days.strftime('%Y-%m-%d') + '.txt', 'r') as r:
+								    for line in r.readlines():
+									if line.startswith(underlying):
+										f.write(underlying + "," + str(option1) + "," + str(option2) + "\n")
+							with open(ten_days.strftime('%Y-%m-%d') + '.txt', 'a') as f:
+							    with open(ten_days.strftime('%Y-%m-%d') + '.txt', 'r') as r:
+								    for line in r.readlines():
+									if line.startswith(underlying):
+										f.write(underlying + "," + str(option1) + "," + str(option2) + "\n")
 else:
 	print "it's a weekend"

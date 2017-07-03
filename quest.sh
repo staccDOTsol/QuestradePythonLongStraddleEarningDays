@@ -1,5 +1,6 @@
+
 while :
 do
 	python questrade.py 
-	sleep 86400
+	sleep 14400
 done

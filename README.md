@@ -7,7 +7,9 @@ Upon running the day before the earning date for that underlying, the script sel
 qpositions.py outputs:
 
 closed pnl: -34
+
 open pnl: 653
+
 cost: 81507
 
 note that this script doesn't work unless you follow the directions here: 
@@ -18,6 +20,7 @@ and paste the generated token, replacing the contents of 'refresh_token.txt.'
 
 Afterwards, run: 
 sudo nohup quest.sh &
+
 sudo nohup qtrade.sh &
 
 follow your earnings with:

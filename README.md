@@ -29,3 +29,7 @@ sudo nohup qtrade.sh &
 
 follow your earnings with:
 sudo tail -f nohup.out
+
+Note: A Django webserver exists in the directory.
+
+python qpositions/manage.py runserver

@@ -51,7 +51,7 @@ def perCurrency():
 if weekno<5:
 	today = DT.date.today()
 	#one_day = today + DT.timedelta(days=1) ## in production
-	one_day = today + DT.timedelta(days=0)
+	one_day = today + DT.timedelta(days=1)
 	eight_days = today + DT.timedelta(days=7)
 	nine_days = today + DT.timedelta(days=8)
 	ten_days = today + DT.timedelta(days=9)

@@ -18,7 +18,7 @@ http://www.questrade.com/api/documentation/getting-started
 
 and paste the generated token, replacing the contents of 'refresh_token.txt.'
 
-Also, replace every instance of '26016670' with your account # you want to work with in questrade.py and qpositions.py.
+Also, replace every instance of '26016670' with your account # you want to work with in questrade.py and qpositions.py and qpositions/qpositionsApp/views.py.
 
 This script works with both Questrade practice & real accounts.
 

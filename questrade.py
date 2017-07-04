@@ -7,12 +7,19 @@ import datetime
 import time
 server = ""
 headers = {}
+symbol = 0
+dates = ""
+down = 0
+up = 0
 weekno = datetime.datetime.today().weekday()
 def requestTry(i):
 	date = today + DT.timedelta(days=i)
 	dates = date.strftime('%Y-%m-%d')
 	dates += "T00:00:00.000000-05:00" 
+	#print symbol
 	#print dates
+	#print up
+	#print down
 	data = {
     "filters": [
 	{
@@ -20,14 +27,14 @@ def requestTry(i):
 	    "underlyingId": symbol,
 	    "expiryDate": dates,
 	    "minstrikePrice": down,
-	    "maxstrikePrice": down
+	    "maxstrikePrice": up
 	},
 	{
 	    "optionType": "Put",
 	    "underlyingId": symbol,
 	    "expiryDate": dates,
 	    "minstrikePrice": down,
-	    "maxstrikePrice": down
+	    "maxstrikePrice": up
 	}
     ]
 }	
@@ -41,13 +48,13 @@ def perCurrency():
 		
 		return response['perCurrencyBalances'][1]['buyingPower']
 	else:
-		print 'time.sleep60'
+		
 		time.sleep(60)
 		perCurrency()
 if weekno<5:
 	today = DT.date.today()
 	#one_day = today + DT.timedelta(days=1) ## in production
-	one_day = today + DT.timedelta(days=1)
+	one_day = today + DT.timedelta(days=0)
 	eight_days = today + DT.timedelta(days=8)
 	nine_days = today + DT.timedelta(days=9)
 	ten_days = today + DT.timedelta(days=10)
@@ -197,6 +204,7 @@ if weekno<5:
 			price = response['quotes'][0]['lastTradePriceTrHrs']
 			uri = server + "v1/markets/quotes/options"
 			down = int(price)
+			up = math.ceil(price)
 			i = 59
 			done = False
 			while i <= 90 and done is not True: #70
@@ -205,9 +213,8 @@ if weekno<5:
 								
 				try:
 					response = requestTry(i).json()
-				
+					#print response
 				except ValueError as e:
-					print 'time.sleep(60)'
 					time.sleep(60)
 					#print response
 				if 'optionQuotes' in response:

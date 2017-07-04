@@ -34,7 +34,7 @@ def index(request):
 	with open('../refresh_token.txt', 'w') as f:
 		f.write(refresh_token)
 	headers = {'Authorization': token_type + ' ' + access_token, 'content-type': 'application/json'}
-	uri = server + "v1/accounts/26016670/positions"
+	uri = server + "v1/accounts/26016670/positions&stream=true&mode=RawSocket"
 	r = requests.get(uri, headers=headers)
 	response = r.json()
 	print response
@@ -42,36 +42,25 @@ def index(request):
 	closedPnl = 0
 	totalCost = 0
 	body = ""
-	symbolIds = {}
+	
 	for item in response['positions']:
-		symbolIds[item['symbol']] = {'symbolId':(item['symbolId']), 'averageEntryPrice': str(item['averageEntryPrice']), 'totalCost': str(item['totalCost']), 'openQuantity' : str(item['openQuantity'])}
-		#body += "symbol: " + item['symbol'] + "<br>"
-		#body += "averageEntryPrice: " + str(item['averageEntryPrice']) + "<br>"
-		#body += "currentPrice: " + item['currentPrice'] + "<br>"
-		#body += "cost: " + str(item['totalCost']) + "<br>"
-		#body += "closedPnl: " + item['closedPnl'] + "<br>"
-		#body += "openPnl: " + item['openPnl'] + "<br><br>"
+		body += "symbol: " + item['symbol'] + "<br>"
+		body += "closedQuantity: " + str(item['closedQuantity']) + "<br>"
+                body += "openQuantity: " + str(item['openQuantity']) + "<br>"
+                
+	
+		body += "averageEntryPrice: " + str(item['averageEntryPrice']) + "<br>"
+		body += "currentPrice: " + str(item['currentPrice']) + "<br>"
+		body += "cost: " + str(item['totalCost']) + "<br>"
+		body += "closedPnl: " + str(item['closedPnl']) + "<br>"
+		body += "openPnl: " + str(item['openPnl']) + "<br><br>"
 		
 		#print 'closed pnl: ' + str(item['closedPnl'])
 		#print 'open pnl: ' + str(item['openPnl'])
 		totalCost = totalCost + item['totalCost']
 		closedPnl = closedPnl + item['closedPnl']
 		openPnl = openPnl + item['openPnl']
-	print symbolIds	
-	for key, item in symbolIds.iteritems():
-		body += "symbol: " + key + "<br>"
-		body += "averageEntryPrice: " + str(item['averageEntryPrice']) + "<br>"
-		body += "cost: " + str(item['totalCost']) + "<br>"
-		body += "open quantity: " + str(item['openQuantity']) + "<br>"
-		
-		uri = server + "v1/markets/quotes/" + str(item['symbolId'])
-		r = requests.get(uri, headers=headers)
-		response = r.json()
-		#print response
-		body += "current bidPrice: " + str(response['quotes'][0]['bidPrice']) + "<br>"
-		body += "P/l: " + str(-1*100*((1 - (response['quotes'][0]['bidPrice'] / float(item['averageEntryPrice']) ))))
-		body += "<br><br>"
-	body += "<br><br>Totals (not realtime):<br>openPnl: " + str(openPnl) + "<br>"
+	body += "<br><br>Totals:<br>openPnl: " + str(openPnl) + "<br>"
 	body += "closedPnl: " + str(closedPnl) + "<br>"
 	body += "total cost: " + str(totalCost) + "<br>"
 	print 'closed pnl: ' + str(closedPnl)
@@ -80,11 +69,8 @@ def index(request):
 	uri = server + "v1/accounts/26016670/balances"
 	r = requests.get(uri, headers=headers)
 	response = r.json()
-	equity = response['perCurrencyBalances'][1]['totalEquity']
-	buyingpower = response['perCurrencyBalances'][1]['buyingPower']
-	body += "Realtime values: <br>" 
-	body += "Equity: " + str(equity) + "<br>"
-	body += "Buying power: " + str(buyingpower) + "<br>"
-	body += "Total P/l %: " + str(100*(1- (500000 / equity))) + "<br><br><br>"
-	
+	#print response
+	cadbuyingpower = response['perCurrencyBalances'][0]['buyingPower']
+	usdbuyingpower = response['perCurrencyBalances'][1]['buyingPower']
+	body += "buying power: " + str(usdbuyingpower / 3) + "<br><br><br>"
 	return HttpResponse('<html><head><meta http-equiv="refresh" content="580" ></head><body>' + body + '</body></html>')

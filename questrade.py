@@ -51,10 +51,10 @@ def perCurrency():
 if weekno<5:
 	today = DT.date.today()
 	#one_day = today + DT.timedelta(days=1) ## in production
-	one_day = today + DT.timedelta(days=1)
-	eight_days = today + DT.timedelta(days=8)
-	nine_days = today + DT.timedelta(days=9)
-	ten_days = today + DT.timedelta(days=10)
+	one_day = today + DT.timedelta(days=0)
+	eight_days = today + DT.timedelta(days=7)
+	nine_days = today + DT.timedelta(days=8)
+	ten_days = today + DT.timedelta(days=9)
 
 	with open ('refresh_token.txt', 'r') as f:
 		refresh_token = f.read().strip()

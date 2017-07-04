@@ -16,10 +16,7 @@ def requestTry(i):
 	date = today + DT.timedelta(days=i)
 	dates = date.strftime('%Y-%m-%d')
 	dates += "T00:00:00.000000-05:00" 
-	#print symbol
 	#print dates
-	#print up
-	#print down
 	data = {
     "filters": [
 	{
@@ -54,7 +51,7 @@ def perCurrency():
 if weekno<5:
 	today = DT.date.today()
 	#one_day = today + DT.timedelta(days=1) ## in production
-	one_day = today + DT.timedelta(days=0)
+	one_day = today + DT.timedelta(days=1)
 	eight_days = today + DT.timedelta(days=8)
 	nine_days = today + DT.timedelta(days=9)
 	ten_days = today + DT.timedelta(days=10)
@@ -156,23 +153,23 @@ if weekno<5:
 	tree10 = html.fromstring(ten_days_earnings.content)
 	companies10 = tree10.xpath("//table[@id='ECCompaniesTable']//td[contains(., '(')]/a/text()") 
 	for company in companies8:
-		start = company.index('(')
+		start = company.rfind('(')
 		start+=1
-		end = company.index(')')
+		end = company.rfind(')')
 		earningTickers.append(company[start:end])
 		with open(eight_days.strftime('%Y-%m-%d') + '.txt', 'a') as f:
 			f.write(company[start:end] + '\n')
 	for company in companies9:
-		start = company.index('(')
+		start = company.rfind('(')
 		start+=1
-		end = company.index(')')
+		end = company.rfind(')')
 		earningTickers.append(company[start:end])
 		with open(nine_days.strftime('%Y-%m-%d') + '.txt', 'a') as f:
 			f.write(company[start:end] + '\n')
 	for company in companies10:
-		start = company.index('(')
+		start = company.rfind('(')
 		start+=1
-		end = company.index(')')
+		end = company.rfind(')')
 		earningTickers.append(company[start:end])
 		with open(ten_days.strftime('%Y-%m-%d') + '.txt', 'a') as f:
 			f.write(company[start:end] + '\n')
@@ -239,7 +236,8 @@ if weekno<5:
 								"quantity": qty,
 								"isAllOrNone": True,
 								"isAnonymous": False,
-								"orderType": "Market",
+								"orderType": "Limit",
+								"limitPrice": ask1,
 								"timeInForce": "Day",
 								"action": "Buy",
 								"primaryRoute": "AUTO",
@@ -254,7 +252,8 @@ if weekno<5:
 								"quantity": qty,
 								"isAllOrNone": True,
 								"isAnonymous": False,
-								"orderType": "Market",
+								"orderType": "Limit",
+								"limitPrice": ask2,
 								"timeInForce": "Day",
 								"action": "Buy",
 								"primaryRoute": "AUTO",

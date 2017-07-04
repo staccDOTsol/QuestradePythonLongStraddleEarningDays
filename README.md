@@ -25,7 +25,8 @@ This script works with both Questrade practice & real accounts.
 Afterwards, run: 
 sudo nohup quest.sh &
 
-sudo nohup qtrade.sh &
+(alternatively to the next two steps, you can use the Django server to monitor output of current/past positions as described in the final note)
+sudo nohup qtrade.sh & 
 
 follow your earnings with:
 sudo tail -f nohup.out

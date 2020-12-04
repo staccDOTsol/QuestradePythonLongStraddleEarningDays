@@ -1,3 +1,4 @@
+If you found this repo useful, consider clicking the sponsor button near the top :) Sponsoring via GitHub is as little as $1/month and if you do not use banks or credit cards, there are crypto links included :)<br /><br />
 # QuestradePythonLongStraddleEarningDays
 
 Note that this script is now technically a strangle but by a very small bit. It looks for calls and puts within the dollar of a strikeprice in difference.
